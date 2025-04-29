@@ -25,5 +25,5 @@ print(missing_summary)
 
 
 # ---- Step 4: Save Processed Clean Data ----
-write_csv(clean_data, "data/processed/clean_data.csv")
-message("Data cleaning completed and saved to data/processed/clean_data.csv")
+saveRDS(clean_data, file = "data/processed/cleaned_data.rds")
+message("Data cleaning completed and saved to data/processed/clean_data.rds")
