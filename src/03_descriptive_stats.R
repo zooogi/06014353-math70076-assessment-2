@@ -7,8 +7,9 @@
 library(tidyverse)
 library(psych)
 
-# --- Read raw data ---
+# --- Read data ---
 df_raw <- read_csv("data/raw/Data Carrard et al. 2022 MedTeach.csv")
+df_cesd<- readRDS("data/processed/derived_data.rds")
 
 # =========================================================
 # Part 1: Table 1 - Descriptive Statistics
@@ -118,16 +119,6 @@ chi_result <- chisq.test(chi_table)
 print(chi_result) # do not reject H0
 
 # --- CES-D depression risk ---
-df_cesd <- df_raw %>%
-  filter(sex %in% c(1, 2)) %>%
-  mutate(
-    depressed = case_when(
-      sex == 1 & cesd >= 16 ~ 1,
-      sex == 2 & cesd >= 21 ~ 1,
-      TRUE ~ 0
-    )
-  )
-
 depression_rate <- mean(df_cesd$depressed) * 100
 cat("Percentage at risk of depression:", round(depression_rate, 3), "%\n")
 
