@@ -132,6 +132,7 @@ cesd_prevalence <- df_cesd %>%
 
 # ---Save---
 write_csv(cesd_prevalence, "figures/cesd_prevalence_by_year.csv")
+message(" CES-D cut-off prevalence saved.")
 
 # ---quick check---
 pct_vector <- cesd_prevalence$positive_pct
@@ -161,10 +162,10 @@ run_table3_model <- function(emp_var, outcome_var, data) {
     select(estimate_std = Std_Coefficient)
   
   # 4) Extract partial eta squared
-  td_eta <- eta_squared(m, partial = TRUE) %>% 
+  td_eta <- eta_squared(m, partial = FALSE) %>% 
     as_tibble() %>% 
     filter(Parameter == emp_var) %>% 
-    select(eta2 = Eta2_partial)
+    select(eta2 = Eta2)
   
   # 5) Extract F-statistic and R-squared
   gl <- glance(m)
