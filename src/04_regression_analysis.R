@@ -23,7 +23,6 @@ burnout_vars <- c("mbi_ex", "mbi_cy", "mbi_ea")  # Emotional exhaustion, Cynicis
 empathy_vars <- c("jspe", "qcae_cog", "qcae_aff", "amsp", "erec_mean")  # Empathy group
 
 
-
 # --- Unified function: Fit model once and extract tidy + eta ---
 run_lm_full <- function(outcome_var, data = df_clean) {
   model <- lm(reformulate(c("year", "sex"), outcome_var), data = data)
@@ -58,11 +57,20 @@ run_lm_standardized <- function(outcome_var, data = df_clean) {
     filter(Parameter != "(Intercept)") %>%
     select(term = Parameter, estimate_std = Std_Coefficient)
   
+  # Model-level F and R²
+  gl <- glance(model)
+  model_stats <- tibble(
+    outcome = outcome_var,
+    F       = round(gl$statistic, 2),
+    R2      = round(gl$r.squared,  2)
+  )
+  
   #merge
   raw_stats %>%
     left_join(std_coef, by = "term") %>%
     mutate(outcome = outcome_var) %>%
-    select(outcome, term, estimate_std, std.error, p.value)
+    left_join(model_stats, by = "outcome") %>%
+    select(outcome, term, estimate_std, std.error, p.value, F, R2)
 }
 
 # --- Run all models ---
@@ -71,10 +79,9 @@ table2_tidy_raw <- map_dfr(results, "tidy")
 table2_eta <- map_dfr(results, "eta")
 table2_std <- map_dfr(c(mental_vars, burnout_vars, empathy_vars), run_lm_standardized)
 
-# --- Join standardized beta and eta ---
-# --- Format beta + significance stars ---
 
 
+# --- Unified function: Fit model once and extract tidy + eta + model ---
 table2_final <- table2_std %>%
   #1) Mark predictor for later alignment with eta table
   mutate(
@@ -82,13 +89,11 @@ table2_final <- table2_std %>%
       str_starts(term, "year") ~ "year",
       str_starts(term, "sex")  ~ "sex",
       TRUE                     ~ NA_character_
-    )
-  ) %>%
+    )) %>%
   #2) Rename the term of the eta table to predictor, and then join
   left_join(
     table2_eta %>% rename(predictor = term),
-    by = c("outcome", "predictor")
-  ) %>%
+    by = c("outcome", "predictor")) %>%
   #3) Generate β and η, round them up, and add an asterisk
   mutate(
     β_val   = round(estimate_std, 2),
@@ -103,7 +108,7 @@ table2_final <- table2_std %>%
     std.error = round(std.error, 2)
   ) %>%
   #4) Finally select outcome, term, β, and standard error eta
-  select(outcome, term, β, std.error, eta)
+  select(outcome, term, β, std.error, eta, F, R2)
 
 
 # ---Export results---
@@ -147,7 +152,7 @@ print(pct_vector)
 run_table3_model <- function(emp_var, outcome_var, data) {
   
   # 1) Formula: outcome ~ empathy
-  fml <- reformulate(emp_var, outcome_var)
+  fml <- reformulate(c("year","sex",emp_var), outcome_var)
   m   <- lm(fml, data)
   
   # 2) Extract raw coefficient, standard error, and p-value

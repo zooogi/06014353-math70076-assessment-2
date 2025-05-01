@@ -8,7 +8,7 @@ library(tidyverse)
 library(psych)
 
 # --- Read data ---
-df_raw <- read_csv("data/raw/Data Carrard et al. 2022 MedTeach.csv")
+df_raw <- read_csv("data/raw/Data Carrard et al. 2022 MedTeach.csv",show_col_types = FALSE)
 df_cesd<- readRDS("data/processed/derived_data.rds")
 
 # =========================================================
