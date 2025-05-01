@@ -44,7 +44,6 @@ library(kableExtra)
 library(stringr)
 library(tidyverse)
 library(ggplot2)
-library(stringr)
 library(forcats)
 ```
 ```{r load table and data, include=FALSE}

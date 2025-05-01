@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+# Ignore intermediate tables
+*.RData
+*.Rhistory
+.DS_Store
